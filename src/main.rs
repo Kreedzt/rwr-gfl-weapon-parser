@@ -2,12 +2,15 @@ extern crate serde_xml_rs;
 extern crate csv;
 
 mod model;
+mod decode;
 
 use std::{fs, io};
+use std::io::Read;
+use std::path::Path;
 use chrono::prelude::*;
 use csv::Writer;
-use serde_xml_rs::{from_reader};
-use crate::model::Output;
+use serde_xml_rs::{from_reader, from_str};
+use crate::model::{Output, Weapon};
 
 fn main() {
     let local = Local::now();
@@ -29,11 +32,15 @@ fn main() {
     let output_file_name = format!("output-{}.csv", current_time);
     let mut writer = Writer::from_path(output_file_name).expect("can't output file");
 
-    for path in entries {
-        println!("path_name: {:?}", path.display().to_string());
+    let total = entries.len();
 
-        let de: model::Weapon = from_reader(fs::File::open(path).expect("fs open file error"))
-            .expect("parse error");
+    for (index, path) in entries.into_iter().enumerate() {
+        println!("process: {} / {}", index + 1, total);
+        println!("===Starting parsing file: {}===", path.display().to_string());
+
+        let res_str = decode::read_file_decode_to_utf8(&path.into_os_string().into_string().unwrap());
+
+        let de: model::Weapon = from_str(&res_str).expect("parse error");
 
         println!("{:?}", de);
 
@@ -41,9 +48,13 @@ fn main() {
 
         // 若包含 file， 表明存在模板
         if let Some(template_name) = de.file {
-            println!("");
-            println!("===Starting parsing template===");
-            let template_de: model::Weapon = from_reader(fs::File::open(format!("{}\\{}", folder_path, template_name)).expect("can't open template file name")).expect("de template error");
+            println!("found template");
+            println!("===Starting parsing template: {}===", template_name);;
+            //let template_de: model::Weapon = from_reader(fs::File::open(format!("{}\\{}", folder_path, template_name)).expect("can't open template file name")).expect("de template error");
+
+            let template_file_path = format!("{}\\{}", folder_path, template_name);
+            let res_str = decode::read_file_decode_to_utf8(&template_file_path);
+            let template_de: Weapon = from_str(&res_str).expect("parse str err");
 
             output_struct.key = template_de.key;
             output_struct.hud_icon = template_de.hud_icon.unwrap_or_default().filename;
@@ -53,46 +64,32 @@ fn main() {
             output_struct.time_to_live_out_in_the_open = template_de.time_to_live_out_in_the_open;
             output_struct.player_death_drop_owner_lock_time = template_de.player_death_drop_owner_lock_time;
 
-            // output_struct.retrigger_time = template_de.specification.retrigger_time;
-            // output_struct.accuracy_factor = template_de.specification.accuracy_factor;
-            // output_struct.sustained_fire_grow_step = template_de.specification.sustained_fire_grow_step;
-            // output_struct.sustained_fire_diminish_rate = template_de.specification.sustained_fire_diminish_rate;
-            //
-            // output_struct.magazine_size = template_de.specification.magazine_size;
-            // output_struct.can_shoot_standing = template_de.specification.can_shoot_standing;
-            // output_struct.sight_range_modifier = template_de.specification.sight_range_modifier;
-            // output_struct.suppressed = template_de.specification.suppressed;
-            // output_struct.name = template_de.specification.name;
-            // output_struct.class = template_de.specification.class;
-            //
-            // output_struct.projectile_speed = template_de.specification.projectile_speed;
-            // output_struct.barrel_offset = template_de.specification.barrel_offset;
-
+            println!("===Parsing template completed===");
         }
 
         if let Some(key) = de.key {
-            output_struct.key.get_or_insert(key);
+            output_struct.key = Some(key);
         }
 
         if let Some(hud_icon) = de.hud_icon.unwrap_or_default().filename {
-            output_struct.hud_icon.get_or_insert(hud_icon);
+            output_struct.hud_icon = Some(hud_icon);
         }
 
         // 掉落信息
         if let Some(drop_count_factor_on_death) = de.drop_count_factor_on_death {
-            output_struct.drop_count_factor_on_death.get_or_insert(drop_count_factor_on_death);
+            output_struct.drop_count_factor_on_death = Some(drop_count_factor_on_death);
         }
 
         if let Some(drop_count_factor_on_player_death) = de.drop_count_factor_on_player_death {
-            output_struct.drop_count_factor_on_player_death.get_or_insert(drop_count_factor_on_player_death);
+            output_struct.drop_count_factor_on_player_death = Some(drop_count_factor_on_player_death);
         }
 
         if let Some(time_to_live_out_in_the_open) = de.time_to_live_out_in_the_open {
-            output_struct.time_to_live_out_in_the_open.get_or_insert(time_to_live_out_in_the_open);
+            output_struct.time_to_live_out_in_the_open = Some(time_to_live_out_in_the_open);
         }
 
         if let Some(player_death_drop_owner_lock_time) = de.player_death_drop_owner_lock_time {
-            output_struct.player_death_drop_owner_lock_time.get_or_insert(player_death_drop_owner_lock_time);
+            output_struct.player_death_drop_owner_lock_time = Some(player_death_drop_owner_lock_time);
         }
         // End
 
@@ -100,51 +97,51 @@ fn main() {
         // 特殊信息
         if let Some(specification) = de.specification {
             if let Some(retrigger_time) = specification.retrigger_time {
-                output_struct.retrigger_time.get_or_insert(retrigger_time);
+                output_struct.retrigger_time = Some(retrigger_time);
             }
 
             if let Some(accuracy_factory) = specification.accuracy_factor {
-                output_struct.accuracy_factor.get_or_insert(accuracy_factory);
+                output_struct.accuracy_factor = Some(accuracy_factory);
             }
 
             if let Some(sustained_fire_grow_step) = specification.sustained_fire_grow_step {
-                output_struct.sustained_fire_grow_step.get_or_insert(sustained_fire_grow_step);
+                output_struct.sustained_fire_grow_step = Some(sustained_fire_grow_step);
             }
 
             if let Some(sustated_fire_diminish_rate) = specification.sustained_fire_diminish_rate {
-                output_struct.sustained_fire_diminish_rate.get_or_insert(sustated_fire_diminish_rate);
+                output_struct.sustained_fire_diminish_rate = Some(sustated_fire_diminish_rate);
             }
 
             if let Some(magazine_size) = specification.magazine_size {
-                output_struct.magazine_size.get_or_insert(magazine_size);
+                output_struct.magazine_size = Some(magazine_size);
             }
 
             if let Some(can_shoot_standing) = specification.can_shoot_standing {
-                output_struct.can_shoot_standing.get_or_insert(can_shoot_standing);
+                output_struct.can_shoot_standing = Some(can_shoot_standing);
             }
 
             if let Some(sight_range_modifier) = specification.sight_range_modifier {
-                output_struct.sight_range_modifier.get_or_insert(sight_range_modifier);
+                output_struct.sight_range_modifier = Some(sight_range_modifier);
             }
 
             if let Some(suppressed) = specification.suppressed {
-                output_struct.suppressed.get_or_insert(suppressed);
+                output_struct.suppressed = Some(suppressed);
             }
 
             if let Some(name) = specification.name {
-                output_struct.name.get_or_insert(name);
+                output_struct.name = Some(name);
             }
 
             if let Some(class) = specification.class {
-                output_struct.class.get_or_insert(class);
+                output_struct.class = Some(class);
             }
 
             if let Some(projectile_speed) = specification.projectile_speed {
-                output_struct.projectile_speed.get_or_insert(projectile_speed);
+                output_struct.projectile_speed = Some(projectile_speed);
             }
 
             if let Some(barrel_offset) = specification.barrel_offset {
-                output_struct.barrel_offset.get_or_insert(barrel_offset);
+                output_struct.barrel_offset = Some(barrel_offset);
             }
         }
 
@@ -154,6 +151,7 @@ fn main() {
         //     "magazine_size", "projectile_speed", "barrel_offset", "can_shoot_standing", "sight_range_modifier",
         //     "suppressed", "name", "class", "projectile_speed", "barrel_offset"]);
 
+        println!("===Parsing file completed===");
         writer.serialize(output_struct);
 
     }

@@ -11,13 +11,16 @@ pub struct Specification {
     pub accuracy_factor: Option<f32>,
     pub sustained_fire_grow_step: Option<f32>,
     pub sustained_fire_diminish_rate: Option<f32>,
-    pub magazine_size: Option<u32>,
+    pub magazine_size: Option<i32>,
     pub can_shoot_standing: Option<u8>,
+    pub can_shoot_crouching: Option<u8>,
+
     pub sight_range_modifier: Option<f32>,
     pub suppressed: Option<u8>,
     pub name: Option<String>,
     pub class: Option<u8>,
     pub projectile_speed: Option<f32>,
+    pub projectiles_per_shot: Option<u8>,
     pub barrel_offset: Option<f32>
 }
 
@@ -49,15 +52,15 @@ pub struct Weapon {
     pub time_to_live_out_in_the_open: Option<f32>,
     pub player_death_drop_owner_lock_time: Option<f32>,
 
-    pub tag: Option<Tag>,
+    // pub tag: Option<Vec<Tag>>,
 
     pub specification: Option<Specification>,
 
     pub hud_icon: Option<HudIcon>,
 
-    pub modifier: Option<Modifier>,
+    // pub modifier: Option<Vec<Modifier>>,
 
-    pub stance: Vec<Stance>,
+    pub stance: Option<Vec<Stance>>,
 }
 
 
@@ -77,7 +80,7 @@ pub struct Output {
     pub sustained_fire_grow_step: Option<f32>,
     pub sustained_fire_diminish_rate: Option<f32>,
 
-    pub magazine_size: Option<u32>,
+    pub magazine_size: Option<i32>,
     pub can_shoot_standing: Option<u8>,
     pub sight_range_modifier: Option<f32>,
     pub suppressed: Option<u8>,
@@ -144,12 +147,14 @@ impl Default for Specification {
             sustained_fire_diminish_rate: None,
             magazine_size: None,
             can_shoot_standing: None,
+            can_shoot_crouching: None,
             sight_range_modifier: None,
             suppressed: None,
             name: None,
             class: None,
             projectile_speed: None,
-            barrel_offset: None
+            barrel_offset: None,
+            projectiles_per_shot: None
         }
     }
 }
