@@ -34,7 +34,7 @@ fn main() {
         .expect("parse error");
 
     let output_file_name = format!("output-{}.csv", current_time);
-    let mut writer = Writer::from_path(output_file_name).expect("can't output file");
+    let mut writer = Writer::from_path(&output_file_name).expect("can't output file");
 
     let total = entries.len();
 
@@ -161,4 +161,6 @@ fn main() {
     }
 
     writer.flush().expect("flush error");
+
+    println!("Task completed, fileName: {}", output_file_name);
 }
