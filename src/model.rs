@@ -1,4 +1,14 @@
+use std::path::PathBuf;
 use serde::{Serialize, Deserialize};
+use structopt::StructOpt;
+
+#[derive(Debug, StructOpt)]
+#[structopt(name = "weapon-parser", about = "gf mod weapon data parser")]
+pub struct Opt {
+    /// weapon folder full path
+    #[structopt(short, long, parse(from_os_str))]
+    pub input: PathBuf
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Tag {

@@ -6,8 +6,9 @@ mod decode;
 
 use std::{fs, io};
 use std::io::Read;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use chrono::prelude::*;
+use structopt::StructOpt;
 use csv::Writer;
 use serde_xml_rs::{from_reader, from_str};
 use crate::model::{Output, Weapon};
@@ -17,13 +18,16 @@ fn main() {
 
     let current_time = local.format("%Y-%m-%d-%H-%M-%S").to_string();
 
-    let folder_path = r#"D:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\Girls_FrontLine\weapons"#;
+    // let folder_path = r#"D:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\Girls_FrontLine\weapons"#;
+
+    let opt = model::Opt::from_args();
+    let folder_path: PathBuf = opt.input;
 
     println!("current_time: {}", current_time);
 
-    println!("folder_path: {}", folder_path);
+    println!("folder_path: {}", folder_path.display().to_string());
 
-    let entries = fs::read_dir(folder_path).expect("can't read dir")
+    let entries = fs::read_dir(folder_path.clone()).expect("can't read dir")
         .map(|res| res.map(|e| e.path()))
         .filter(|path| path.as_ref().unwrap().display().to_string().ends_with(".weapon"))
         .collect::<Result<Vec<_>, io::Error>>()
@@ -49,10 +53,10 @@ fn main() {
         // 若包含 file， 表明存在模板
         if let Some(template_name) = de.file {
             println!("found template");
-            println!("===Starting parsing template: {}===", template_name);;
+            println!("===Starting parsing template: {}===", template_name);
             //let template_de: model::Weapon = from_reader(fs::File::open(format!("{}\\{}", folder_path, template_name)).expect("can't open template file name")).expect("de template error");
 
-            let template_file_path = format!("{}\\{}", folder_path, template_name);
+            let template_file_path = format!("{}\\{}", folder_path.clone().display().to_string(), template_name);
             let res_str = decode::read_file_decode_to_utf8(&template_file_path);
             let template_de: Weapon = from_str(&res_str).expect("parse str err");
 
