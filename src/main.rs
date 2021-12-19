@@ -143,6 +143,10 @@ fn main() {
                 output_struct.retrigger_time = Some(retrigger_time);
             }
 
+            if let Some(last_burst_retrigger_time) = specification.last_burst_retrigger_time {
+                output_struct.last_burst_retrigger_time = Some(last_burst_retrigger_time);
+            }
+
             if let Some(accuracy_factory) = specification.accuracy_factor {
                 output_struct.accuracy_factor = Some(accuracy_factory);
             }
@@ -179,6 +183,22 @@ fn main() {
                 output_struct.sight_range_modifier = Some(sight_range_modifier);
             }
 
+            if let Some(ai_sight_range_modifier) = specification.ai_sight_range_modifier {
+                output_struct.ai_sight_range_modifier = Some(ai_sight_range_modifier);
+            }
+
+            if let Some(stab_enabled) = specification.stab_enabled {
+                output_struct.stab_enabled = Some(stab_enabled);
+            }
+
+            if let Some(stab_range) = specification.stab_range {
+                output_struct.stab_range = Some(stab_range);
+            }
+
+            if let Some(reload_one_at_a_time) = specification.reload_one_at_a_time {
+                output_struct.reload_one_at_a_time = Some(reload_one_at_a_time);
+            }
+
             if let Some(suppressed) = specification.suppressed {
                 output_struct.suppressed = Some(suppressed);
             }
@@ -191,6 +211,10 @@ fn main() {
                 output_struct.class = Some(class);
             }
 
+            if let Some(slot) = specification.slot {
+                output_struct.slot = Some(slot);
+            }
+
             if let Some(projectile_speed) = specification.projectile_speed {
                 output_struct.projectile_speed = Some(projectile_speed);
             }
@@ -199,8 +223,16 @@ fn main() {
                 output_struct.projectiles_per_shot = Some(projectiles_per_shot);
             }
 
+            if let Some(spread_range) = specification.spread_range {
+                output_struct.spread_range = Some(spread_range);
+            }
+
             if let Some(barrel_offset) = specification.barrel_offset {
                 output_struct.barrel_offset = Some(barrel_offset);
+            }
+
+            if let Some(sight_height_offset) = specification.sight_height_offset {
+                output_struct.sight_height_offset = Some(sight_height_offset);
             }
         }
 

@@ -33,6 +33,8 @@ pub struct Tag {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Specification {
     pub retrigger_time: Option<f32>,
+    pub last_burst_retrigger_time: Option<f32>,
+
     pub accuracy_factor: Option<f32>,
     pub sustained_fire_grow_step: Option<f32>,
     pub sustained_fire_diminish_rate: Option<f32>,
@@ -44,13 +46,26 @@ pub struct Specification {
 
     pub burst_shots: Option<i32>,
     pub sight_range_modifier: Option<f32>,
+    pub ai_sight_range_modifier: Option<f32>,
+
+    pub stab_enabled: Option<i8>,
+    pub stab_range: Option<f32>,
+    pub reload_one_at_a_time: Option<i8>,
+
     pub suppressed: Option<u8>,
     pub name: Option<String>,
     pub class: Option<u8>,
-    pub projectile_speed: Option<f32>,
+    pub slot: Option<i8>,
 
+    pub projectile_speed: Option<f32>,
     pub projectiles_per_shot: Option<u8>,
-    pub barrel_offset: Option<f32>
+
+    pub spread_range: Option<f32>,
+
+    pub barrel_offset: Option<f32>,
+    // FIXME: 源文件包含为空的内容
+    // pub sight_height_offset: Option<f32>
+    pub sight_height_offset: Option<String>,
 }
 
 /**
@@ -144,25 +159,38 @@ pub struct Output {
     pub player_death_drop_owner_lock_time: Option<f32>,
 
     pub retrigger_time: Option<f32>,
+    pub last_burst_retrigger_time: Option<f32>,
+
     pub accuracy_factor: Option<f32>,
     pub sustained_fire_grow_step: Option<f32>,
     pub sustained_fire_diminish_rate: Option<f32>,
-
     pub magazine_size: Option<i32>,
+
     pub can_shoot_standing: Option<u8>,
     pub can_shoot_crouching: Option<u8>,
     pub can_shoot_prone: Option<u8>,
 
     pub burst_shots: Option<i32>,
-
     pub sight_range_modifier: Option<f32>,
+    pub ai_sight_range_modifier: Option<f32>,
+
+    pub stab_enabled: Option<i8>,
+    pub stab_range: Option<f32>,
+    pub reload_one_at_a_time: Option<i8>,
+
     pub suppressed: Option<u8>,
     pub name: Option<String>,
     pub class: Option<u8>,
+    pub slot: Option<i8>,
 
     pub projectile_speed: Option<f32>,
     pub projectiles_per_shot: Option<u8>,
+
+    pub spread_range: Option<f32>,
     pub barrel_offset: Option<f32>,
+    // FIXME: 源文件包含为空的内容
+    // pub sight_height_offset: Option<f32>,
+    pub sight_height_offset: Option<String>,
 
     pub running_accuracy: Option<f32>,
     pub walking_accuracy: Option<f32>,
@@ -186,6 +214,7 @@ impl Default for Output {
             player_death_drop_owner_lock_time: None,
 
             retrigger_time: None,
+            last_burst_retrigger_time: None,
             accuracy_factor: None,
             sustained_fire_grow_step: None,
             sustained_fire_diminish_rate: None,
@@ -199,13 +228,20 @@ impl Default for Output {
             burst_shots: None,
 
             sight_range_modifier: None,
+            ai_sight_range_modifier: None,
+            stab_enabled: None,
+            stab_range: None,
+            reload_one_at_a_time: None,
             suppressed: None,
             name: None,
             class: None,
 
+            slot: None,
             projectile_speed: None,
             projectiles_per_shot: None,
+            spread_range: None,
             barrel_offset: None,
+            sight_height_offset: None,
 
             running_accuracy: None,
             walking_accuracy: None,
@@ -223,25 +259,36 @@ impl Default for Specification {
     fn default() -> Self {
         Specification {
             retrigger_time: None,
+            last_burst_retrigger_time: None,
+
             accuracy_factor: None,
             sustained_fire_grow_step: None,
             sustained_fire_diminish_rate: None,
             magazine_size: None,
+
             can_shoot_standing: None,
-            // TODO
             can_shoot_crouching: None,
-            // TODO
             can_shoot_prone: None,
+
             burst_shots: None,
             sight_range_modifier: None,
+            ai_sight_range_modifier: None,
+
+            stab_enabled: None,
+            stab_range: None,
+
             suppressed: None,
             name: None,
             class: None,
-            projectile_speed: None,
-            // TODO
+            slot: None,
+
+            spread_range: None,
+            reload_one_at_a_time: None,
+
             barrel_offset: None,
-            // TODO
-            projectiles_per_shot: None
+            projectile_speed: None,
+            projectiles_per_shot: None,
+            sight_height_offset: None
         }
     }
 }
