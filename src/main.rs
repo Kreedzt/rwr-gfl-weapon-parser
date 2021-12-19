@@ -33,7 +33,7 @@ fn main() {
         .collect::<Result<Vec<_>, io::Error>>()
         .expect("parse error");
 
-    let output_file_name = format!("output-{}.csv", current_time);
+    let output_file_name = format!("weapon-parser-output-{}.csv", current_time);
     let mut writer = Writer::from_path(&output_file_name).expect("can't output file");
 
     let total = entries.len();
@@ -60,6 +60,8 @@ fn main() {
             let res_str = decode::read_file_decode_to_utf8(&template_file_path);
             let template_de: Weapon = from_str(&res_str).expect("parse str err");
 
+            println!("{:?}", template_de);
+
             output_struct.key = template_de.key;
             output_struct.hud_icon = template_de.hud_icon.unwrap_or_default().filename;
 
@@ -68,8 +70,45 @@ fn main() {
             output_struct.time_to_live_out_in_the_open = template_de.time_to_live_out_in_the_open;
             output_struct.player_death_drop_owner_lock_time = template_de.player_death_drop_owner_lock_time;
 
+            // stance 信息
+            if let Some(stance_vec) = template_de.stance {
+                for stance_item in stance_vec {
+                    match stance_item.state_key.as_str() {
+                        "running" => {
+                            output_struct.running_accuracy = Some(stance_item.accuracy);
+                        },
+                        "walking" => {
+                            output_struct.walking_accuracy = Some(stance_item.accuracy);
+                        },
+                        "crouching" => {
+                            output_struct.crouching_accuracy = Some(stance_item.accuracy);
+                        },
+                        "crouch_moving" => {
+                            output_struct.crouch_moving_accuracy = Some(stance_item.accuracy);
+                        },
+                        "standing" => {
+                            output_struct.standing_accuracy = Some(stance_item.accuracy);
+                        },
+                        "prone"  => {
+                            output_struct.prone_accuracy = Some(stance_item.accuracy);
+                        },
+                        "prone_moving" => {
+                            output_struct.prone_moving_accuracy = Some(stance_item.accuracy);
+                        },
+                        "over_wall" => {
+                            output_struct.over_wall_accuracy = Some(stance_item.accuracy);
+                        },
+                        _ => {
+                            println!("Not matched state key: {}", stance_item.state_key);
+                        }
+                    }
+                }
+            }
+
+
             println!("===Parsing template completed===");
         }
+        // 模板解析结束
 
         if let Some(key) = de.key {
             output_struct.key = Some(key);
@@ -124,6 +163,18 @@ fn main() {
                 output_struct.can_shoot_standing = Some(can_shoot_standing);
             }
 
+            if let Some(can_shoot_crouching) = specification.can_shoot_crouching {
+                output_struct.can_shoot_crouching = Some(can_shoot_crouching);
+            }
+
+            if let Some(can_shoot_prone) = specification.can_shoot_prone {
+                output_struct.can_shoot_prone = Some(can_shoot_prone);
+            }
+
+            if let Some(burst_shots) = specification.burst_shots {
+                output_struct.burst_shots = Some(burst_shots);
+            }
+
             if let Some(sight_range_modifier) = specification.sight_range_modifier {
                 output_struct.sight_range_modifier = Some(sight_range_modifier);
             }
@@ -144,16 +195,50 @@ fn main() {
                 output_struct.projectile_speed = Some(projectile_speed);
             }
 
+            if let Some(projectiles_per_shot) = specification.projectiles_per_shot {
+                output_struct.projectiles_per_shot = Some(projectiles_per_shot);
+            }
+
             if let Some(barrel_offset) = specification.barrel_offset {
                 output_struct.barrel_offset = Some(barrel_offset);
             }
         }
 
+        // stance 信息
+        if let Some(stance_vec) = de.stance {
+            for stance_item in stance_vec {
+                match stance_item.state_key.as_str() {
+                    "running" => {
+                        output_struct.running_accuracy = Some(stance_item.accuracy);
+                    },
+                    "walking" => {
+                        output_struct.walking_accuracy = Some(stance_item.accuracy);
+                    },
+                    "crouching" => {
+                        output_struct.crouching_accuracy = Some(stance_item.accuracy);
+                    },
+                    "crouch_moving" => {
+                        output_struct.crouch_moving_accuracy = Some(stance_item.accuracy);
+                    },
+                    "standing" => {
+                        output_struct.standing_accuracy = Some(stance_item.accuracy);
+                    },
+                    "prone"  => {
+                        output_struct.prone_accuracy = Some(stance_item.accuracy);
+                    },
+                    "prone_moving" => {
+                        output_struct.prone_moving_accuracy = Some(stance_item.accuracy);
+                    },
+                    "over_wall" => {
+                        output_struct.over_wall_accuracy = Some(stance_item.accuracy);
+                    },
+                    _ => {
+                        println!("Not matched state key: {}", stance_item.state_key);
+                    }
+                }
+            }
+        }
 
-        // writer.write_record(&["key", "hud_icon", "retrigger_time", "accuracy_factor",
-        // "suppressed", "sustained_fire_grow_step", "sustained_fire_diminish_rate",
-        //     "magazine_size", "projectile_speed", "barrel_offset", "can_shoot_standing", "sight_range_modifier",
-        //     "suppressed", "name", "class", "projectile_speed", "barrel_offset"]);
 
         println!("===Parsing file completed===");
         writer.serialize(output_struct);
