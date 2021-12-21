@@ -1,4 +1,6 @@
 /target
 .idea/
-*.csv
 *.xlsx
+*.docx
+*.csv
+*.exe

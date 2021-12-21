@@ -10,7 +10,8 @@ use std::path::{Path, PathBuf};
 use chrono::prelude::*;
 use structopt::StructOpt;
 use csv::Writer;
-use serde_xml_rs::{from_reader, from_str};
+// use serde_xml_rs::{from_reader, from_str};
+use quick_xml::de::from_str;
 use crate::model::{Output, Weapon};
 
 fn main() {

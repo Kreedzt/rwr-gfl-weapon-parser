@@ -1,6 +1,7 @@
+use serde::de;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
-use serde::{Serialize, Deserialize};
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -8,25 +9,22 @@ use structopt::StructOpt;
 pub struct Opt {
     /// weapon folder full path
     #[structopt(short, long, parse(from_os_str))]
-    pub input: PathBuf
+    pub input: PathBuf,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum TagEnum {
-    #[serde(rename = "name")]
-    Name(String)
-
-    // Item {
-    //     name: String,
-    // }
-    // #[serde(rename = "name")]
     // Name(String)
+    #[serde(rename = "tag")]
+    Tag { name: Option<String> },
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Tag {
-    #[serde(flatten)]
-    item: TagEnum
+    // #[serde(flatten)]
+    // item: TagEnum
+    // #[serde(deserialize_with = "deserialize_tag")]
+    name: Option<String>,
 }
 
 // 模板暂未读取
@@ -89,7 +87,7 @@ pub struct Stance {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum StanceEnum {
     #[serde(rename = "accuracy")]
-    Accuracy(f32)
+    Accuracy(f32),
 }
 
 // 包含内容
@@ -101,7 +99,7 @@ pub enum StanceEnum {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Modifier {
     pub class: String,
-    pub value: f32
+    pub value: f32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -109,7 +107,7 @@ pub enum ModifierEnum {
     #[serde(rename = "class")]
     Class(String),
     #[serde(rename = "value")]
-    Value(f32)
+    Value(f32),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -118,6 +116,12 @@ pub struct HudIcon {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum WeaponExtraEnum {
+    #[serde(rename = "name")]
+    Name(String)
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Weapon {
     pub file: Option<String>,
     pub key: Option<String>,
@@ -134,7 +138,10 @@ pub struct Weapon {
     // pub tag: Option<HashMap<String, String>>,
 
     // TODO
+    // #[serde(default)]
+    // #[serde(deserialize_with = "deserialize_tag")]
     // pub tag: Option<Vec<Tag>>,
+
 
     pub specification: Option<Specification>,
 
@@ -142,10 +149,10 @@ pub struct Weapon {
 
     // TODO
     // pub modifier: Option<HashMap<String, String>>,
-
     pub stance: Option<Vec<Stance>>,
-}
 
+    // pub tag: Option<HashMap<String, String>>,
+}
 
 // 适用于 CSV 输出的内容
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -199,7 +206,7 @@ pub struct Output {
     pub crouching_accuracy: Option<f32>,
     pub prone_accuracy: Option<f32>,
     pub prone_moving_accuracy: Option<f32>,
-    pub over_wall_accuracy: Option<f32>
+    pub over_wall_accuracy: Option<f32>,
 }
 
 impl Default for Output {
@@ -250,7 +257,7 @@ impl Default for Output {
             standing_accuracy: None,
             prone_accuracy: None,
             prone_moving_accuracy: None,
-            over_wall_accuracy: None
+            over_wall_accuracy: None,
         }
     }
 }
@@ -288,7 +295,7 @@ impl Default for Specification {
             barrel_offset: None,
             projectile_speed: None,
             projectiles_per_shot: None,
-            sight_height_offset: None
+            sight_height_offset: None,
         }
     }
 }
@@ -303,9 +310,6 @@ impl Default for Specification {
 
 impl Default for HudIcon {
     fn default() -> Self {
-        HudIcon {
-            filename: None,
-        }
+        HudIcon { filename: None }
     }
 }
-
