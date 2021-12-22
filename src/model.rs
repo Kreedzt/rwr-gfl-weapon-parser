@@ -160,6 +160,8 @@ pub struct Output {
     pub key: Option<String>,
     pub hud_icon: Option<String>,
 
+    pub tag: Option<String>,
+
     pub drop_count_factor_on_death: Option<f32>,
     pub drop_count_factor_on_player_death: Option<f32>,
     pub time_to_live_out_in_the_open: Option<f32>,
@@ -207,6 +209,8 @@ pub struct Output {
     pub prone_accuracy: Option<f32>,
     pub prone_moving_accuracy: Option<f32>,
     pub over_wall_accuracy: Option<f32>,
+
+    pub modifier_speed: Option<f32>,
 }
 
 impl Default for Output {
@@ -214,6 +218,8 @@ impl Default for Output {
         Output {
             key: None,
             hud_icon: None,
+
+            tag: None,
 
             drop_count_factor_on_death: None,
             drop_count_factor_on_player_death: None,
@@ -258,6 +264,8 @@ impl Default for Output {
             prone_accuracy: None,
             prone_moving_accuracy: None,
             over_wall_accuracy: None,
+
+            modifier_speed: None
         }
     }
 }
