@@ -158,9 +158,12 @@ pub struct Weapon {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Output {
     pub key: Option<String>,
+    pub weapon_template_file: Option<String>,
+
     pub hud_icon: Option<String>,
 
     pub tag: Option<String>,
+
 
     pub drop_count_factor_on_death: Option<f32>,
     pub drop_count_factor_on_player_death: Option<f32>,
@@ -220,6 +223,7 @@ pub struct Output {
 impl Default for Output {
     fn default() -> Self {
         Output {
+            weapon_template_file: None,
             key: None,
             hud_icon: None,
 
