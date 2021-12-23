@@ -7,7 +7,6 @@ use crate::model::{Output, Weapon};
 use chrono::prelude::*;
 use csv::Writer;
 use quick_xml::{events::Event, Reader};
-use serde::__private::de::IdentifierDeserializer;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::{fs, io, str};
@@ -43,6 +42,9 @@ fn main() {
     let output_file_name = format!("weapon-parser-output-{}.csv", current_time);
     let mut writer = Writer::from_path(&output_file_name).expect("can't output file");
 
+    // let extra_msg_list: Rc<Vec<String>> = Rc::new(Vec::new());
+    let mut extra_msg_list = Vec::new();
+
     let total = entries.len();
 
     for (index, path) in entries.into_iter().enumerate() {
@@ -66,6 +68,9 @@ fn main() {
         loop {
             match reader.read_event(&mut buf) {
                 Ok(Event::Start(ref e)) => {
+                    // let mut extra_list = Rc::clone(&extra_msg_list);
+                    let mut extra_list = extra_msg_list.clone();
+
                     match e.name() {
                         b"weapon" => {
                             for attr in e.attributes() {
@@ -100,7 +105,12 @@ fn main() {
                                         output_struct.player_death_drop_owner_lock_time =
                                             Some(attr_value.parse().unwrap());
                                     }
+                                    b"quality" => {
+                                        output_struct.quality = Some(attr_value);
+                                    }
                                     _ => {
+                                        let msg = format!("weapon attr: {} / {}", str::from_utf8(attr_key).unwrap(), attr_value);
+                                        extra_msg_list.push(msg);
                                         // DEBUG
                                         // println!("Don't care weapon attr: {} {}", str::from_utf8(attr_key).unwrap(), attr_value);
                                     }
@@ -118,6 +128,9 @@ fn main() {
                 }
                 // 闭合标签
                 Ok(Event::Empty(ref e)) => {
+                    // let mut extra_list = Rc::clone(&extra_msg_list);
+                    // let mut extra_list = extra_msg_list.clone();
+
                     match e.name() {
                         b"tag" => {
                             for attr in e.attributes() {
@@ -226,9 +239,9 @@ fn main() {
                                     b"slot" => {
                                         output_struct.slot = Some(attr_value.parse().unwrap());
                                     }
-                                    // TODO
                                     b"barrel_offset_3d" => {
-                                        println!("TODO barrel_offset_3d");
+                                        // TODO :DEBUG
+                                        // println!("TODO barrel_offset_3d");
                                     }
                                     b"projectiles_per_shot" => {
                                         output_struct.projectiles_per_shot =
@@ -241,12 +254,15 @@ fn main() {
                                     b"sight_height_offset" => {
                                         output_struct.sight_height_offset = Some(attr_value);
                                     }
+                                    b"carry_in_two_hands" => {
+                                        output_struct.carry_in_two_hands = Some(attr_value.parse().unwrap());
+                                    }
+                                    b"barrel_offset" => {
+                                        output_struct.barrel_offset = Some(attr_value.parse().unwrap());
+                                    }
                                     _ => {
-                                        println!(
-                                            "Don't care specification attr: {} {}",
-                                            str::from_utf8(attr_key).unwrap(),
-                                            attr_value
-                                        );
+                                        let msg = format!("specification attr: {} / {}", str::from_utf8(attr_key).unwrap(), attr_value);
+                                        extra_msg_list.push(msg);
                                     }
                                 }
                             }
@@ -410,12 +426,15 @@ fn main() {
                 _ => (),
             }
         }
-        println!("===parse completed===");
 
         // 若包含 file， 表明存在模板
         if let Some(file) = weapon_template_file_name {
-            // TODO
+            println!("===found template: {}, ready parse===", file);
+
+
         }
+
+        println!("===parse completed===");
 
         // if let Some(template_name) = de.file {
         //     println!("found template");
@@ -482,4 +501,14 @@ fn main() {
     writer.flush().expect("flush error");
 
     println!("Task completed, fileName: {}", output_file_name);
+
+    println!("===extra_msg_list===");
+
+    // let mut extra_msg_list = Rc::clone(&extra_msg_list);
+
+    // println!("{:?}", extra_msg_list);
+
+    for item in extra_msg_list {
+        println!("{}", item);
+    }
 }

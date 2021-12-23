@@ -167,6 +167,10 @@ pub struct Output {
     pub time_to_live_out_in_the_open: Option<f32>,
     pub player_death_drop_owner_lock_time: Option<f32>,
 
+    pub quality: Option<String>,
+
+    pub carry_in_two_hands: Option<i8>,
+
     pub retrigger_time: Option<f32>,
     pub last_burst_retrigger_time: Option<f32>,
 
@@ -218,6 +222,10 @@ impl Default for Output {
         Output {
             key: None,
             hud_icon: None,
+
+            quality: None,
+
+            carry_in_two_hands: None,
 
             tag: None,
 
