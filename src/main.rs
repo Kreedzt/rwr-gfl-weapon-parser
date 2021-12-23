@@ -4,7 +4,7 @@ mod decode;
 mod model;
 mod parse;
 
-use crate::model::{Output, Weapon};
+use crate::model::{Output};
 use crate::parse::{parse_empty_event, parse_normal_event};
 use chrono::prelude::*;
 use csv::Writer;

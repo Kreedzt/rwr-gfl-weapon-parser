@@ -25,7 +25,7 @@ fn parse_weapon(
                 // TODO
             }
             b"drop_count_factor_on_death" => {
-                output_struct.drop_count_factor_on_player_death.get_or_insert(attr_value.parse().unwrap());
+                output_struct.drop_count_factor_on_death.get_or_insert(attr_value.parse().unwrap());
             }
             b"drop_count_factor_on_player_death" => {
                 output_struct.drop_count_factor_on_player_death.get_or_insert(attr_value.parse().unwrap());
@@ -288,8 +288,9 @@ fn parse_modifier(
         let attr_key = attr_unwrap_res.key;
 
         match attr_key {
+            // FIXME： 疑似不存在
             b"speed" => {
-                output_struct.modifier_speed.get_or_insert(attr_value.parse().unwrap());
+                // output_struct.modifier_speed.get_or_insert(attr_value.parse().unwrap());
             }
             _ => {
                 // DEBUG
