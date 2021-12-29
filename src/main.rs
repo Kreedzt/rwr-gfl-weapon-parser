@@ -52,7 +52,12 @@ fn main() {
 
     for (index, path) in entries.into_iter().enumerate() {
         println!("process: {} / {}", index + 1, total);
-        println!("===Starting parsing file: {}===", path.display());
+        // let last_path = path.display().to_string().split("\\").last().unwrap();
+        let path_string = path.display().to_string();
+        let path_list = path_string.split("\\").collect::<Vec<_>>();
+
+        let last_path = path_list.last().unwrap();
+        println!("===Starting parsing file: {}===", last_path);
 
         let res_str =
             decode::read_file_decode_to_utf8(&path.into_os_string().into_string().unwrap()).unwrap_or("".to_string());
