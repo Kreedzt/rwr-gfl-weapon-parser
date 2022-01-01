@@ -15,8 +15,11 @@ pub struct Opt {
 // 适用于 CSV 输出的内容
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Output {
+    // weapon info
     pub key: Option<String>,
     pub weapon_template_file: Option<String>,
+    pub radius: Option<f32>,
+    pub transform_on_consume: Option<String>,
 
     pub hud_icon: Option<String>,
 
@@ -75,6 +78,24 @@ pub struct Output {
     pub prone_moving_accuracy: Option<f32>,
     pub over_wall_accuracy: Option<f32>,
 
+    pub use_basic_muzzle_smoke_effect: Option<i32>,
+    pub spawn_instance_class: Option<String>,
+    pub spawn_instance_key: Option<String>,
+    pub consume: Option<i32>,
+    pub deployment: Option<i32>,
+    pub stance_accuracy_rate: Option<f32>,
+    pub barrel_offset_ed: Option<String>,
+    pub success_probability: Option<f32>,
+    pub range: Option<f32>,
+    pub character_state: Option<String>,
+    pub cover_deployment: Option<i32>,
+    pub affect_characters: Option<i32>,
+    pub affect_vehicles: Option<i32>,
+    pub damage: Option<f32>,
+    pub untransform_equipment_class: Option<String>,
+    pub untransform_count: Option<i32>,
+    pub solt: Option<i32>,
+
     // pub modifier_speed: Option<f32>,
 }
 
@@ -82,8 +103,10 @@ impl Default for Output {
     fn default() -> Self {
         Output {
             weapon_template_file: None,
+            radius: None,
             key: None,
             hud_icon: None,
+            transform_on_consume: None,
 
             quality: None,
 
@@ -135,6 +158,23 @@ impl Default for Output {
             prone_moving_accuracy: None,
             over_wall_accuracy: None,
 
+            use_basic_muzzle_smoke_effect: None,
+            spawn_instance_class: None,
+            spawn_instance_key: None,
+            consume: None,
+            deployment: None,
+            stance_accuracy_rate: None,
+            barrel_offset_ed: None,
+            success_probability: None,
+            range: None,
+            character_state: None,
+            cover_deployment: None,
+            affect_characters: None,
+            affect_vehicles: None,
+            damage: None,
+            untransform_equipment_class: None,
+            untransform_count: None,
+            solt: None,
             // modifier_speed: None
         }
     }

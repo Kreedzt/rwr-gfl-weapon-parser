@@ -15,6 +15,9 @@ fn parse_weapon(
         let attr_key = attr_unwrap_res.key;
 
         match attr_key {
+            b"name" => {
+                output_struct.name.get_or_insert(attr_value);
+            }
             b"file" => {
                 output_struct.weapon_template_file.get_or_insert(attr_value);
             }
@@ -38,6 +41,12 @@ fn parse_weapon(
             }
             b"quality" => {
                 output_struct.quality.get_or_insert(attr_value);
+            }
+            b"radius" => {
+                output_struct.radius.get_or_insert(attr_value.parse().unwrap());
+            }
+            b"transform_on_consume" => {
+                output_struct.transform_on_consume.get_or_insert(attr_value);
             }
             _ => {
                 let msg = format!(
@@ -170,6 +179,57 @@ fn parse_specification(
             }
             b"barrel_offset" => {
                 output_struct.barrel_offset.get_or_insert(attr_value.parse().unwrap());
+            }
+            b"use_basic_muzzle_smoke_effect" => {
+                output_struct.use_basic_muzzle_smoke_effect.get_or_insert(attr_value.parse().unwrap());
+            }
+            b"spawn_instance_class" => {
+                output_struct.spawn_instance_class.get_or_insert(attr_value);
+            }
+            b"spawn_instance_key" => {
+                output_struct.spawn_instance_key.get_or_insert(attr_value);
+            }
+            b"consume" => {
+                output_struct.consume.get_or_insert(attr_value.parse().unwrap());
+            }
+            b"deployment" => {
+                output_struct.deployment.get_or_insert(attr_value.parse().unwrap());
+            }
+            b"stance_accuracy_rate" => {
+                output_struct.stance_accuracy_rate.get_or_insert(attr_value.parse().unwrap());
+            }
+            b"barrel_offset_ed" => {
+                output_struct.barrel_offset_ed.get_or_insert(attr_value);
+            }
+            b"success_probability" => {
+                output_struct.success_probability.get_or_insert(attr_value.parse().unwrap());
+            }
+            b"range" => {
+                output_struct.range.get_or_insert(attr_value.parse().unwrap());
+            }
+            b"character_state" => {
+                output_struct.character_state.get_or_insert(attr_value);
+            }
+            b"cover_deployment" => {
+                output_struct.cover_deployment.get_or_insert(attr_value.parse().unwrap());
+            }
+            b"affect_characters" => {
+                output_struct.affect_characters.get_or_insert(attr_value.parse().unwrap());
+            }
+            b"affect_vehicles" => {
+                output_struct.affect_vehicles.get_or_insert(attr_value.parse().unwrap());
+            }
+            b"damage" => {
+                output_struct.damage.get_or_insert(attr_value.parse().unwrap());
+            }
+            b"untransform_equipment_class" => {
+                output_struct.untransform_equipment_class.get_or_insert(attr_value);
+            }
+            b"untransform_count" => {
+                output_struct.untransform_count.get_or_insert(attr_value.parse().unwrap());
+            }
+            b"solt" => {
+                output_struct.solt.get_or_insert(attr_value.parse().unwrap());
             }
             _ => {
                 let msg = format!(
