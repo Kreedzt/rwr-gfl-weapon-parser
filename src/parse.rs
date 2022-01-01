@@ -25,7 +25,7 @@ fn parse_weapon(
                 output_struct.key.get_or_insert(attr_value);
             }
             b"on_ground_up" => {
-                // TODO
+                output_struct.on_ground_up.get_or_insert(attr_value);
             }
             b"drop_count_factor_on_death" => {
                 output_struct.drop_count_factor_on_death.get_or_insert(attr_value.parse().unwrap());
@@ -162,8 +162,7 @@ fn parse_specification(
                 output_struct.slot.get_or_insert(attr_value.parse().unwrap());
             }
             b"barrel_offset_3d" => {
-                // TODO :DEBUG
-                // println!("TODO barrel_offset_3d");
+                output_struct.barrel_offset_3d.get_or_insert(attr_value);
             }
             b"projectiles_per_shot" => {
                 output_struct.projectiles_per_shot.get_or_insert(attr_value.parse().unwrap());

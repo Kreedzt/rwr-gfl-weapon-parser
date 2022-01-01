@@ -20,6 +20,7 @@ pub struct Output {
     pub weapon_template_file: Option<String>,
     pub radius: Option<f32>,
     pub transform_on_consume: Option<String>,
+    pub on_ground_up: Option<String>,
 
     pub hud_icon: Option<String>,
 
@@ -95,6 +96,7 @@ pub struct Output {
     pub untransform_equipment_class: Option<String>,
     pub untransform_count: Option<i32>,
     pub solt: Option<i32>,
+    pub barrel_offset_3d: Option<String>,
 
     // pub modifier_speed: Option<f32>,
 }
@@ -107,6 +109,7 @@ impl Default for Output {
             key: None,
             hud_icon: None,
             transform_on_consume: None,
+            on_ground_up: None,
 
             quality: None,
 
@@ -175,6 +178,7 @@ impl Default for Output {
             untransform_equipment_class: None,
             untransform_count: None,
             solt: None,
+            barrel_offset_3d: None
             // modifier_speed: None
         }
     }
