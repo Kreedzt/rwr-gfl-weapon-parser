@@ -10,6 +10,8 @@
 .\weapon-parser.exe -i D:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\Girls_FrontLine\weapons
 ```
 
+执行成功后会在当前目录生成一个带时间的 `CSV` 文件
+
 ## 开发
 
 该项目采用 Rust 语言编写，需要 [Rust](https://www.rust-lang.org/) 开发环境
@@ -42,6 +44,8 @@ cargo build --release
 ``` sh
 .\weapon-parser.exe -i D:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\Girls_FrontLine\weapons
 ```
+
+执行成功后会在当前目录生成一个带时间的 `CSV` 文件
 
 ## 协议
 
