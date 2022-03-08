@@ -4,13 +4,15 @@
 
 下载[构建后代码](https://github.com/Kreedzt/rwr-gfl-weapon-parser/releases), 然后从命令行附带参数启动即可:
 
-> 最后的路径替换为自己的路径即可
+> 路径替换为自己的路径即可
+> -i 后面参数为武器目录路径
+> -t 后面参数为翻译文件路径
 
 ``` sh
-.\weapon-parser.exe -i D:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\Girls_FrontLine\weapons
+.\weapon-parser.exe -i D:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\Girls_FrontLine\weapons -t D:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\Girls_FrontLine\languages\cn\translation_weapon.xml
 ```
 
-执行成功后会在当前目录生成一个带时间的 `CSV` 文件
+执行成功后会在当前目录生成一个带时间的 `CSV` 文件(注意: CSV 文件在 Excel 中直接打开无法读取中文字符, 建议新建 Excel 导入 CSV 数据源打开, 编码选择 UTF-8)
 
 ## 开发
 
@@ -18,10 +20,12 @@
 
 因为需要指定武器目录, 所以启动开发环境需要参数:
 
-> 最后的路径替换为自己的路径即可
+> 路径替换为自己的路径即可
+> -i 后面参数为武器目录路径
+> -t 后面参数为翻译文件路径
 
 ``` sh
-cargo run -- -i D:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\Girls_FrontLine\weapons 
+cargo run -- -i D:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\Girls_FrontLine\weapons -t D:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\Girls_FrontLine\languages\cn\translation_weapon.xml
 ```
 
 ## 构建
@@ -39,13 +43,15 @@ cargo build --release
 
 该文件通过终端赋予参数直接运行:
 
-> 最后的路径替换为自己的路径即可
+> 路径替换为自己的路径即可
+> -i 后面参数为武器目录路径
+> -t 后面参数为翻译文件路径
 
 ``` sh
-.\weapon-parser.exe -i D:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\Girls_FrontLine\weapons
+.\weapon-parser.exe -i D:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\Girls_FrontLine\weapons -t D:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\Girls_FrontLine\languages\cn\translation_weapon.xml
 ```
 
-执行成功后会在当前目录生成一个带时间的 `CSV` 文件
+执行成功后会在当前目录生成一个带时间的 `CSV` 文件(注意: CSV 文件在 Excel 中直接打开无法读取中文字符, 建议新建 Excel 导入 CSV 数据源打开, 编码选择 UTF-8)
 
 ## 协议
 
