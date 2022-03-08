@@ -10,6 +10,9 @@ pub struct Opt {
     /// weapon folder full path
     #[structopt(short, long, parse(from_os_str))]
     pub input: PathBuf,
+    /// cn translation file full path
+    #[structopt(short, long, parse(from_os_str))]
+    pub translation: PathBuf
 }
 
 // 适用于 CSV 输出的内容
@@ -99,6 +102,9 @@ pub struct Output {
     pub barrel_offset_3d: Option<String>,
 
     // pub modifier_speed: Option<f32>,
+
+    // 猜测: 中文名称
+    pub cn_name: Option<String>
 }
 
 impl Default for Output {
@@ -178,8 +184,10 @@ impl Default for Output {
             untransform_equipment_class: None,
             untransform_count: None,
             solt: None,
-            barrel_offset_3d: None
+            barrel_offset_3d: None,
             // modifier_speed: None
+
+            cn_name: None
         }
     }
 }

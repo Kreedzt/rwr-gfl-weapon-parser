@@ -1,6 +1,8 @@
 use crate::Output;
 use quick_xml::events::BytesStart;
 use quick_xml::Reader;
+use std::collections::HashMap;
+use std::iter::Map;
 use std::str;
 
 fn parse_weapon(
@@ -444,3 +446,52 @@ pub fn parse_empty_event(
 }
 
 pub fn parse_event_item() {}
+
+fn parse_translation_text(
+    e: &BytesStart,
+    reader: &mut Reader<&[u8]>,
+    map: &mut HashMap<String, String>,
+    extra_msg_list: &mut Vec<String>
+) {
+    let mut prev_text_key = String::new();
+    for attr in e.attributes() {
+        let attr_unwrap_res = attr.unwrap();
+        let attr_value = attr_unwrap_res.unescape_and_decode_value(&reader).unwrap();
+        let attr_key = attr_unwrap_res.key;
+
+        match attr_key {
+            b"key" => {
+                prev_text_key = attr_value;
+            }
+            b"text" => {
+                if prev_text_key != "" {
+                    map.insert(prev_text_key.clone(), attr_value);
+                }
+            }
+            _ => {
+                // DEBUG
+                // println!(
+                //     "Don't care tag attr: {} {}",
+                //     str::from_utf8(attr_key).unwrap(),
+                //     attr_value
+                // );
+            }
+        }
+    }
+}
+
+pub fn parse_translation_empty(
+    e: &BytesStart,
+    reader: &mut Reader<&[u8]>,
+    map: &mut HashMap<String, String>,
+    extra_msg_list: &mut Vec<String>,
+) {
+    match e.name() {
+        b"text" => {
+            parse_translation_text(e, reader, map, extra_msg_list);
+        }
+        _ => {
+            // holder
+        }
+    }
+}
