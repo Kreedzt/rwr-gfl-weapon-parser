@@ -2,7 +2,7 @@ cargo-features = ["strip"]
 
 [package]
 name = "weapon-parser"
-version = "0.5.1"
+version = "0.6.0"
 edition = "2021"
 authors = ["Kreedzt"]
 
