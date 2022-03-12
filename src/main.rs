@@ -97,6 +97,8 @@ fn main() {
         let mut reader = Reader::from_str(&res_str);
         reader.trim_text(true);
         let mut buf = Vec::new();
+
+        let mut output_weapons_vec: Vec<Output> = vec![];
         let mut output_struct = Output::default();
 
         loop {
@@ -111,48 +113,62 @@ fn main() {
                 Ok(Event::Text(e)) => {
                     println!("text: {}", e.unescape_and_decode(&reader).unwrap());
                 }
+                Ok(Event::End(ref e)) => {
+                    match e.name() {
+                        // 若为 weapon 结束标签, 表示已经结束一项 weapon
+                        b"weapon" => {
+                            output_weapons_vec.push(output_struct);
+                            output_struct = Output::default();
+                        }
+                        _ => {
+                            // holder
+                        }
+                    }
+                }
                 Ok(Event::Eof) => break,
                 Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
                 _ => (),
             }
         }
 
-        // 若包含 file， 表明存在模板
-        if let Some(ref file) = output_struct.weapon_template_file {
-            println!("===found template: {}, ready to parse===", file);
-            let template_file_name_path = format!("{}\\{}", folder_path.display().to_string(), file);
-            let res_str = decode::read_file_decode_to_utf8(&template_file_name_path).unwrap_or("".to_string());
+        for mut output_item in output_weapons_vec  {
+            // 若包含 file， 表明存在模板
+            if let Some(ref file) = output_item.weapon_template_file {
+                println!("===found template: {}, ready to parse===", file);
+                let template_file_name_path = format!("{}\\{}", folder_path.display().to_string(), file);
+                let res_str = decode::read_file_decode_to_utf8(&template_file_name_path).unwrap_or("".to_string());
 
-            let mut reader = Reader::from_str(&res_str);
-            reader.trim_text(true);
-            let mut buf = Vec::new();
+                let mut reader = Reader::from_str(&res_str);
+                reader.trim_text(true);
+                let mut buf = Vec::new();
 
-            loop {
-                match reader.read_event(&mut buf) {
-                    Ok(Event::Start(ref e)) => {
-                        parse_normal_event(e, &mut reader, &mut output_struct, &mut extra_msg_list);
+                loop {
+                    match reader.read_event(&mut buf) {
+                        Ok(Event::Start(ref e)) => {
+                            parse_normal_event(e, &mut reader, &mut output_struct, &mut extra_msg_list);
+                        }
+                        // 闭合标签
+                        Ok(Event::Empty(ref e)) => {
+                            parse_empty_event(e, &mut reader, &mut output_struct, &mut extra_msg_list);
+                        }
+                        Ok(Event::Text(e)) => {
+                            println!("text: {}", e.unescape_and_decode(&reader).unwrap());
+                        }
+                        Ok(Event::Eof) => break,
+                        Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
+                        _ => (),
                     }
-                    // 闭合标签
-                    Ok(Event::Empty(ref e)) => {
-                        parse_empty_event(e, &mut reader, &mut output_struct, &mut extra_msg_list);
-                    }
-                    Ok(Event::Text(e)) => {
-                        println!("text: {}", e.unescape_and_decode(&reader).unwrap());
-                    }
-                    Ok(Event::Eof) => break,
-                    Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
-                    _ => (),
                 }
             }
+
+            if let Some(s_name) = output_item.name.clone() {
+                output_item.cn_name = translation_map.get(&s_name).map(|n| n.to_string());
+
+                println!("===cn_name: {:?} ===", output_item.cn_name);
+            }
+
+            writer.serialize(output_item.clone());
         }
-
-        if let Some(s_name) = output_struct.name.clone() {
-            output_struct.cn_name = translation_map.get(&s_name).map(|n| n.to_string());
-
-            println!("===cn_name: {:?} ===", output_struct.cn_name);
-        }
-
-        writer.serialize(output_struct.clone());
 
         println!("===parse completed===");
     }
