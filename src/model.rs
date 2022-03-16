@@ -18,6 +18,8 @@ pub struct Opt {
 // 适用于 CSV 输出的内容
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Output {
+    // source file
+    pub source_file_name: String,
     // weapon info
     pub key: Option<String>,
     pub weapon_template_file: Option<String>,
@@ -110,6 +112,8 @@ pub struct Output {
 impl Default for Output {
     fn default() -> Self {
         Output {
+            source_file_name: "".to_string(),
+
             weapon_template_file: None,
             radius: None,
             key: None,

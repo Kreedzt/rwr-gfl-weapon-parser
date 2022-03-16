@@ -100,6 +100,7 @@ fn main() {
 
         let mut output_weapons_vec: Vec<Output> = vec![];
         let mut output_struct = Output::default();
+        output_struct.source_file_name = last_path.to_string();
 
         loop {
             match reader.read_event(&mut buf) {
@@ -119,6 +120,7 @@ fn main() {
                         b"weapon" => {
                             output_weapons_vec.push(output_struct);
                             output_struct = Output::default();
+                            output_struct.source_file_name = last_path.to_string();
                         }
                         _ => {
                             // holder
@@ -145,11 +147,11 @@ fn main() {
                 loop {
                     match reader.read_event(&mut buf) {
                         Ok(Event::Start(ref e)) => {
-                            parse_normal_event(e, &mut reader, &mut output_struct, &mut extra_msg_list);
+                            parse_normal_event(e, &mut reader, &mut output_item, &mut extra_msg_list);
                         }
                         // 闭合标签
                         Ok(Event::Empty(ref e)) => {
-                            parse_empty_event(e, &mut reader, &mut output_struct, &mut extra_msg_list);
+                            parse_empty_event(e, &mut reader, &mut output_item, &mut extra_msg_list);
                         }
                         Ok(Event::Text(e)) => {
                             println!("text: {}", e.unescape_and_decode(&reader).unwrap());
