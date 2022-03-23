@@ -4,17 +4,14 @@ mod decode;
 mod model;
 mod parse;
 
-use crate::model::{Output};
+use crate::model::Output;
 use crate::parse::{parse_empty_event, parse_normal_event, parse_translation_empty};
 use chrono::prelude::*;
 use csv::Writer;
 use quick_xml::{events::Event, Reader};
 use std::collections::HashMap;
-use std::io::Read;
-use std::path::{Path, PathBuf};
-use std::{fs, io, str};
-use std::borrow::Borrow;
-use std::cell::RefCell;
+use std::path::PathBuf;
+use std::{fs, io};
 use structopt::StructOpt;
 
 fn main() {
@@ -47,9 +44,9 @@ fn main() {
 
     loop {
         match reader.read_event(&mut buf) {
-            Ok(Event::Start(ref e)) => {
-                // holder
-            }
+            // Ok(Event::Start(ref e)) => {
+            //     // holder
+            // }
             // 闭合标签
             Ok(Event::Empty(ref e)) => {
                 parse_translation_empty(e, &mut reader, &mut translation_map, &mut extra_msg_list);
@@ -169,7 +166,7 @@ fn main() {
                 println!("===cn_name: {:?} ===", output_item.cn_name);
             }
 
-            writer.serialize(output_item.clone());
+            writer.serialize(output_item.clone()).unwrap();
         }
 
         println!("===parse completed===");

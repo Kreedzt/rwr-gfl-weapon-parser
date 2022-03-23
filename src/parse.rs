@@ -2,7 +2,6 @@ use crate::Output;
 use quick_xml::events::BytesStart;
 use quick_xml::Reader;
 use std::collections::HashMap;
-use std::iter::Map;
 use std::str;
 
 fn parse_weapon(
@@ -68,7 +67,7 @@ fn parse_tag(
     e: &BytesStart,
     reader: &mut Reader<&[u8]>,
     output_struct: &mut Output,
-    extra_msg_list: &mut Vec<String>,
+    _extra_msg_list: &mut Vec<String>,
 ) {
     for attr in e.attributes() {
         let attr_unwrap_res = attr.unwrap();
@@ -248,7 +247,7 @@ fn parse_hud_icon(
     e: &BytesStart,
     reader: &mut Reader<&[u8]>,
     output_struct: &mut Output,
-    extra_msg_list: &mut Vec<String>,
+    _extra_msg_list: &mut Vec<String>,
 ) {
     for attr in e.attributes() {
         let attr_unwrap_res = attr.unwrap();
@@ -275,7 +274,7 @@ fn parse_stance(
     e: &BytesStart,
     reader: &mut Reader<&[u8]>,
     output_struct: &mut Output,
-    extra_msg_list: &mut Vec<String>,
+    _extra_msg_list: &mut Vec<String>,
 ) {
     // 记录上一次的 state_key, 使得下一次的 accuracy 赋值
     let mut prev_state_key: Option<String> = None;
@@ -340,12 +339,12 @@ fn parse_stance(
 fn parse_modifier(
     e: &BytesStart,
     reader: &mut Reader<&[u8]>,
-    output_struct: &mut Output,
-    extra_msg_list: &mut Vec<String>,
+    _output_struct: &mut Output,
+    _extra_msg_list: &mut Vec<String>,
 ) {
     for attr in e.attributes() {
         let attr_unwrap_res = attr.unwrap();
-        let attr_value = attr_unwrap_res.unescape_and_decode_value(&reader).unwrap();
+        let _attr_value = attr_unwrap_res.unescape_and_decode_value(&reader).unwrap();
         let attr_key = attr_unwrap_res.key;
 
         match attr_key {
@@ -445,13 +444,13 @@ pub fn parse_empty_event(
     }
 }
 
-pub fn parse_event_item() {}
+// pub fn parse_event_item() {}
 
 fn parse_translation_text(
     e: &BytesStart,
     reader: &mut Reader<&[u8]>,
     map: &mut HashMap<String, String>,
-    extra_msg_list: &mut Vec<String>
+    _extra_msg_list: &mut Vec<String>
 ) {
     let mut prev_text_key = String::new();
     for attr in e.attributes() {

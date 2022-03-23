@@ -1,6 +1,4 @@
-use serde::de;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::path::PathBuf;
 use structopt::StructOpt;
 

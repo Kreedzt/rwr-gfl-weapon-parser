@@ -53,6 +53,9 @@ cargo build --release
 
 执行成功后会在当前目录生成一个带时间的 `CSV` 文件(注意: CSV 文件在 Excel 中直接打开无法读取中文字符, 建议新建 Excel 导入 CSV 数据源打开, 编码选择 UTF-8)
 
+## 其他项目
+- [RWR GFL mod 护甲数据提取工具](https://github.com/Kreedzt/rwr-gfl-armor-parser)
+
 ## 协议
 
 - [GPLv3](https://opensource.org/licenses/GPL-3.0)
