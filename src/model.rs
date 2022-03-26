@@ -82,6 +82,14 @@ pub struct Output {
     pub prone_moving_accuracy: Option<f32>,
     pub over_wall_accuracy: Option<f32>,
 
+    // modifier
+    pub modifier_speed: Option<String>,
+
+    // result
+    pub result_hit_kill_probability: Option<f32>,
+    pub result_hit_kill_decay_start_time: Option<f32>,
+    pub result_hit_kill_decay_end_time: Option<f32>,
+
     pub use_basic_muzzle_smoke_effect: Option<i32>,
     pub spawn_instance_class: Option<String>,
     pub spawn_instance_key: Option<String>,
@@ -168,6 +176,14 @@ impl Default for Output {
             prone_accuracy: None,
             prone_moving_accuracy: None,
             over_wall_accuracy: None,
+
+            // modifier
+            modifier_speed: None,
+
+            // result
+            result_hit_kill_probability: None,
+            result_hit_kill_decay_start_time: None,
+            result_hit_kill_decay_end_time: None,
 
             use_basic_muzzle_smoke_effect: None,
             spawn_instance_class: None,

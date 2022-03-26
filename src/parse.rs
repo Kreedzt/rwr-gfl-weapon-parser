@@ -339,26 +339,123 @@ fn parse_stance(
 fn parse_modifier(
     e: &BytesStart,
     reader: &mut Reader<&[u8]>,
-    _output_struct: &mut Output,
-    _extra_msg_list: &mut Vec<String>,
+    output_struct: &mut Output,
+    extra_msg_list: &mut Vec<String>,
 ) {
+    // 记录上一次的 class, 使得下一次的 accuracy 赋值
+    let mut prev_class: Option<String> = None;
+
     for attr in e.attributes() {
         let attr_unwrap_res = attr.unwrap();
-        let _attr_value = attr_unwrap_res.unescape_and_decode_value(&reader).unwrap();
+        let attr_value = attr_unwrap_res.unescape_and_decode_value(&reader).unwrap();
+        let attr_key = attr_unwrap_res.key;
+
+
+        match attr_key {
+            b"class" => {
+                prev_class = Some(attr_value);
+            }
+            b"value" => {
+                if let Some(modifier_class_key) = prev_class.clone() {
+                    match modifier_class_key.as_str() {
+                        "speed" => {
+                            output_struct.modifier_speed.get_or_insert(attr_value);
+                        }
+                        _ => {
+                            let msg = format!(
+                                "modifier value extra class: {}",
+                                modifier_class_key,
+                            );
+                            extra_msg_list.push(msg);
+                        }
+                    }
+                }
+            }
+            _ => {
+                let msg = format!(
+                    "modifier attr: {} / {}",
+                    str::from_utf8(attr_key).unwrap(),
+                    attr_value
+                );
+                extra_msg_list.push(msg);
+            }
+        }
+    }
+}
+
+pub fn parse_result(
+    e: &BytesStart,
+    reader: &mut Reader<&[u8]>,
+    output_struct: &mut Output,
+    extra_msg_list: &mut Vec<String>,
+) {
+    let mut prev_class: Option<String> = None;
+
+    for attr in e.attributes() {
+        let attr_unwrap_res = attr.unwrap();
+        let attr_value = attr_unwrap_res.unescape_and_decode_value(&reader).unwrap();
         let attr_key = attr_unwrap_res.key;
 
         match attr_key {
-            // FIXME： 疑似不存在
-            b"speed" => {
-                // output_struct.modifier_speed.get_or_insert(attr_value.parse().unwrap());
+            b"class" => {
+                prev_class = Some(attr_value);
+            }
+            b"kill_probability" => {
+                if let Some(class) = prev_class.clone() {
+                    match class.as_str() {
+                        "hit" => {
+                            output_struct.result_hit_kill_probability.get_or_insert(attr_value.parse().unwrap());
+                        }
+                        _ => {
+                            let msg = format!(
+                                "result kill_probability extra class: {}",
+                                class
+                            );
+                            extra_msg_list.push(msg);
+                        }
+                    }
+                }
+            }
+            b"kill_decay_start_time" => {
+                if let Some(class) = prev_class.clone() {
+                    match class.as_str() {
+                        "hit" => {
+                            output_struct.result_hit_kill_decay_start_time.get_or_insert(attr_value.parse().unwrap());
+                        }
+                        _ => {
+                            let msg = format!(
+                                "result kill_decay_start_time extra class: {}",
+                                class
+                            );
+                            extra_msg_list.push(msg);
+                        }
+                    }
+                }
+            }
+            b"kill_decay_end_time" => {
+                if let Some(class) = prev_class.clone() {
+                    match class.as_str() {
+                        "hit" => {
+                            output_struct.result_hit_kill_decay_end_time.get_or_insert(attr_value.parse().unwrap());
+                        }
+                        _ => {
+                            let msg = format!(
+                                "result kill_decay_end_time extra class: {}",
+                                class
+                            );
+                            extra_msg_list.push(msg);
+                        }
+                    }
+                }
             }
             _ => {
-                // DEBUG
-                // println!(
-                //     "Don't care modifier attr: {} {}",
-                //     str::from_utf8(attr_key).unwrap(),
-                //     attr_value
-                // );
+                let msg = format!(
+                    "result attr: {} / {}",
+                    str::from_utf8(attr_key).unwrap(),
+                    attr_value
+                );
+
+                extra_msg_list.push(msg);
             }
         }
     }
@@ -417,8 +514,7 @@ pub fn parse_empty_event(
             // println!("TODO: ballistics  parse");
         }
         b"result" => {
-            // TODO
-            // println!("TODO: result parse");
+            parse_result(e, reader, output_struct, extra_msg_list);
         }
         b"effect" => {
             // TODO
