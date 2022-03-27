@@ -461,6 +461,37 @@ pub fn parse_result(
     }
 }
 
+pub fn parse_next_in_chain(
+    e: &BytesStart,
+    reader: &mut Reader<&[u8]>,
+    output_struct: &mut Output,
+    extra_msg_list: &mut Vec<String>,
+) {
+    for attr in e.attributes() {
+        let attr_unwrap_res = attr.unwrap();
+        let attr_value = attr_unwrap_res.unescape_and_decode_value(&reader).unwrap();
+        let attr_key = attr_unwrap_res.key;
+
+        match attr_key {
+            b"key" => {
+                output_struct.next_in_chain_key.get_or_insert(attr_value);
+            }
+            b"share_ammo" => {
+                output_struct.next_in_chain_share_ammo.get_or_insert(attr_value.parse().unwrap());
+            }
+            _ => {
+                let msg = format!(
+                    "next_in_chain extra attr: {} / {}",
+                    str::from_utf8(attr_key).unwrap(),
+                    attr_value
+                );
+
+                extra_msg_list.push(msg);
+            }
+        }
+    }
+}
+
 pub fn parse_normal_event(
     e: &BytesStart,
     reader: &mut Reader<&[u8]>,
@@ -529,6 +560,9 @@ pub fn parse_empty_event(
         }
         b"modifier" => {
             parse_modifier(e, reader, output_struct, extra_msg_list);
+        }
+        b"next_in_chain" => {
+            parse_next_in_chain(e, reader, output_struct, extra_msg_list);
         }
         _ => {
             // DEBUG

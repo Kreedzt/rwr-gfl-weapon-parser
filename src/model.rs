@@ -82,6 +82,10 @@ pub struct Output {
     pub prone_moving_accuracy: Option<f32>,
     pub over_wall_accuracy: Option<f32>,
 
+    // next_in_chain
+    pub next_in_chain_key: Option<String>,
+    pub next_in_chain_share_ammo: Option<i8>,
+
     // modifier
     pub modifier_speed: Option<String>,
 
@@ -176,6 +180,10 @@ impl Default for Output {
             prone_accuracy: None,
             prone_moving_accuracy: None,
             over_wall_accuracy: None,
+
+            // next_in_chain
+            next_in_chain_key: None,
+            next_in_chain_share_ammo: None,
 
             // modifier
             modifier_speed: None,
