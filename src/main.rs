@@ -13,6 +13,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::{fs, io};
 use structopt::StructOpt;
+use indicatif::{ProgressBar, ProgressStyle};
 
 fn main() {
     let local = Local::now();
@@ -61,6 +62,7 @@ fn main() {
         }
     }
 
+    // 准备解析武器的 Vec
     let entries = fs::read_dir(folder_path.clone())
         .expect("can't read dir")
         .map(|res| res.map(|e| e.path()))
@@ -79,14 +81,23 @@ fn main() {
 
     let total = entries.len();
 
+    // 进度条设置
+    let pb_count: u64 = total.try_into().unwrap();
+    let pb = ProgressBar::new(pb_count);
+    pb.set_style(
+        ProgressStyle::default_bar()
+            .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
+            .progress_chars("##-")
+    );
+
+    // 开始循环文件路径列表解析
     for (index, path) in entries.into_iter().enumerate() {
-        println!("process: {} / {}", index + 1, total);
-        // let last_path = path.display().to_string().split("\\").last().unwrap();
+        // println!("process: {} / {}", index + 1, total);
         let path_string = path.display().to_string();
         let path_list = path_string.split("\\").collect::<Vec<_>>();
 
         let last_path = path_list.last().unwrap();
-        println!("===Starting parsing file: {}===", last_path);
+        // println!("===Starting parsing file: {}===", last_path);
 
         let res_str =
             decode::read_file_decode_to_utf8(&path.into_os_string().into_string().unwrap()).unwrap_or("".to_string());
@@ -109,7 +120,7 @@ fn main() {
                     parse_empty_event(e, &mut reader, &mut output_struct, &mut extra_msg_list);
                 }
                 Ok(Event::Text(e)) => {
-                    println!("text: {}", e.unescape_and_decode(&reader).unwrap());
+                    // println!("text: {}", e.unescape_and_decode(&reader).unwrap());
                 }
                 Ok(Event::End(ref e)) => {
                     match e.name() {
@@ -133,7 +144,7 @@ fn main() {
         for mut output_item in output_weapons_vec  {
             // 若包含 file， 表明存在模板
             if let Some(ref file) = output_item.weapon_template_file {
-                println!("===found template: {}, ready to parse===", file);
+                // println!("===found template: {}, ready to parse===", file);
                 let template_file_name_path = format!("{}\\{}", folder_path.display().to_string(), file);
                 let res_str = decode::read_file_decode_to_utf8(&template_file_name_path).unwrap_or("".to_string());
 
@@ -151,7 +162,7 @@ fn main() {
                             parse_empty_event(e, &mut reader, &mut output_item, &mut extra_msg_list);
                         }
                         Ok(Event::Text(e)) => {
-                            println!("text: {}", e.unescape_and_decode(&reader).unwrap());
+                            // println!("text: {}", e.unescape_and_decode(&reader).unwrap());
                         }
                         Ok(Event::Eof) => break,
                         Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
@@ -163,16 +174,22 @@ fn main() {
             if let Some(s_name) = output_item.name.clone() {
                 output_item.cn_name = translation_map.get(&s_name).map(|n| n.to_string());
 
-                println!("===cn_name: {:?} ===", output_item.cn_name);
+                // println!("===cn_name: {:?} ===", output_item.cn_name);
             }
 
             writer.serialize(output_item.clone()).unwrap();
         }
 
-        println!("===parse completed===");
+        // println!("===parse completed===");
+
+        // 更新进度条信息
+        pb.set_message(last_path.to_string());
+        pb.inc(1);
     }
 
     writer.flush().expect("flush error");
+
+    pb.finish_with_message("done");
 
     println!("===extra_msg_list===");
 
