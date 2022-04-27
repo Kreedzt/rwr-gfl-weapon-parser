@@ -7,9 +7,16 @@
 > 路径替换为自己的路径即可
 > -i 后面参数为武器目录路径
 > -t 后面参数为翻译文件路径
+> --template (可选参数)后面参数为翻译模板路径(传递后会在当前目录生成translation开头的xml), 参考 template.txt 文件使用的语法
 
 ``` sh
 .\weapon-parser.exe -i F:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\GFLNP\weapons\ -t F:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\GFLNP\languages\cn\translation_weapon.xml
+```
+
+需要翻译为xml时:
+
+``` sh
+.\weapon-parser.exe -i F:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\GFLNP\weapons\ -t F:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\GFLNP\languages\cn\translation_weapon.xml --template .\template.txt
 ```
 
 执行成功后会在当前目录生成一个带时间的 `CSV` 文件(注意: CSV 文件在 Excel 中直接打开无法读取中文字符, 建议新建 Excel 导入 CSV 数据源打开, 编码选择 UTF-8)
@@ -23,6 +30,7 @@
 > 路径替换为自己的路径即可
 > -i 后面参数为武器目录路径
 > -t 后面参数为翻译文件路径
+> --template (可选参数)后面参数为翻译模板路径, 插值语法为 {{}}, 在里面的内容会被变量替换, 从 CSV 的列头可以获取到变量名
 
 ``` sh
 cargo run -- -i F:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\GFLNP\weapons\ -t F:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\GFLNP\languages\cn\translation_weapon.xml
@@ -46,6 +54,7 @@ cargo build --release
 > 路径替换为自己的路径即可
 > -i 后面参数为武器目录路径
 > -t 后面参数为翻译文件路径
+> --template (可选参数)后面参数为翻译模板路径, 参考 template.txt 文件使用的语法
 
 ``` sh
 .\weapon-parser.exe -i F:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\GFLNP\weapons\ -t F:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\GFLNP\languages\cn\translation_weapon.xml
