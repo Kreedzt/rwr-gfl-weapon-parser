@@ -4,23 +4,29 @@ mod decode;
 mod model;
 mod parse;
 
-use crate::model::Output;
-use crate::parse::{parse_empty_event, parse_normal_event, parse_translation_empty};
+use crate::model::{Output, TemplateOutput};
+use crate::parse::{
+    convert_output_struct_to_map, parse_empty_event, parse_normal_event, parse_translation_empty,
+};
 use chrono::prelude::*;
 use csv::Writer;
-use quick_xml::{events::Event, Reader};
+use indicatif::{ProgressBar, ProgressStyle};
+use quick_xml::events::BytesEnd;
+use quick_xml::{
+    events::{BytesStart, Event},
+    Reader,
+};
+use regex::Regex;
 use std::collections::HashMap;
+use std::io::Cursor;
 use std::path::PathBuf;
 use std::{fs, io};
 use structopt::StructOpt;
-use indicatif::{ProgressBar, ProgressStyle};
 
 fn main() {
     let local = Local::now();
 
     let current_time = local.format("%Y-%m-%d-%H-%M-%S").to_string();
-
-    // let folder_path = r#"D:\SteamLibrary\steamapps\workshop\content\270150\2513537759\media\packages\Girls_FrontLine\weapons"#;
 
     let opt = model::Opt::from_args();
     let folder_path: PathBuf = opt.input;
@@ -87,20 +93,18 @@ fn main() {
     pb.set_style(
         ProgressStyle::default_bar()
             .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
-            .progress_chars("##-")
+            .progress_chars("##-"),
     );
+
+    let mut all_output_res_vec = vec![];
 
     // 开始循环文件路径列表解析
     for (index, path) in entries.into_iter().enumerate() {
-        // println!("process: {} / {}", index + 1, total);
-        let path_string = path.display().to_string();
-        let path_list = path_string.split("\\").collect::<Vec<_>>();
-
-        let last_path = path_list.last().unwrap();
-        // println!("===Starting parsing file: {}===", last_path);
+        let last_path = String::from(path.file_name().unwrap().to_str().unwrap());
 
         let res_str =
-            decode::read_file_decode_to_utf8(&path.into_os_string().into_string().unwrap()).unwrap_or("".to_string());
+            decode::read_file_decode_to_utf8(&path.into_os_string().into_string().unwrap())
+                .unwrap_or("".to_string());
 
         let mut reader = Reader::from_str(&res_str);
         reader.trim_text(true);
@@ -108,7 +112,7 @@ fn main() {
 
         let mut output_weapons_vec: Vec<Output> = vec![];
         let mut output_struct = Output::default();
-        output_struct.source_file_name = last_path.to_string();
+        output_struct.source_file_name = last_path.clone();
 
         loop {
             match reader.read_event(&mut buf) {
@@ -128,7 +132,7 @@ fn main() {
                         b"weapon" => {
                             output_weapons_vec.push(output_struct);
                             output_struct = Output::default();
-                            output_struct.source_file_name = last_path.to_string();
+                            output_struct.source_file_name = last_path.clone();
                         }
                         _ => {
                             // holder
@@ -141,12 +145,13 @@ fn main() {
             }
         }
 
-        for mut output_item in output_weapons_vec  {
+        for mut output_item in output_weapons_vec {
             // 若包含 file， 表明存在模板
             if let Some(ref file) = output_item.weapon_template_file {
-                // println!("===found template: {}, ready to parse===", file);
-                let template_file_name_path = format!("{}\\{}", folder_path.display().to_string(), file);
-                let res_str = decode::read_file_decode_to_utf8(&template_file_name_path).unwrap_or("".to_string());
+                let template_file_name_path =
+                    format!("{}\\{}", folder_path.display().to_string(), file);
+                let res_str = decode::read_file_decode_to_utf8(&template_file_name_path)
+                    .unwrap_or("".to_string());
 
                 let mut reader = Reader::from_str(&res_str);
                 reader.trim_text(true);
@@ -155,11 +160,21 @@ fn main() {
                 loop {
                     match reader.read_event(&mut buf) {
                         Ok(Event::Start(ref e)) => {
-                            parse_normal_event(e, &mut reader, &mut output_item, &mut extra_msg_list);
+                            parse_normal_event(
+                                e,
+                                &mut reader,
+                                &mut output_item,
+                                &mut extra_msg_list,
+                            );
                         }
                         // 闭合标签
                         Ok(Event::Empty(ref e)) => {
-                            parse_empty_event(e, &mut reader, &mut output_item, &mut extra_msg_list);
+                            parse_empty_event(
+                                e,
+                                &mut reader,
+                                &mut output_item,
+                                &mut extra_msg_list,
+                            );
                         }
                         Ok(Event::Text(e)) => {
                             // println!("text: {}", e.unescape_and_decode(&reader).unwrap());
@@ -177,13 +192,14 @@ fn main() {
                 // println!("===cn_name: {:?} ===", output_item.cn_name);
             }
 
+            all_output_res_vec.push(output_item.clone());
             writer.serialize(output_item.clone()).unwrap();
         }
 
         // println!("===parse completed===");
 
         // 更新进度条信息
-        pb.set_message(last_path.to_string());
+        pb.set_message(last_path);
         pb.inc(1);
     }
 
@@ -202,4 +218,84 @@ fn main() {
     println!("translation total text count: {}", translation_map.len());
 
     println!("Task completed, fileName: {}", output_file_name);
+
+    if let Some(template_path) = opt.template {
+        println!("===Detected template, translation task started===");
+        let template_content = fs::read_to_string(template_path).expect("can't read template file");
+
+        let re = Regex::new(r"\{\{\w+\}\}").unwrap();
+
+        let mut template_output_vec = vec![];
+
+        println!("all_output_res_vec len: {}", all_output_res_vec.len());
+
+        for weapon in all_output_res_vec {
+            let cloned_weapon = weapon.clone();
+
+            // 替换后的内容
+            let mut res_str = template_content.clone();
+
+            let field_map = convert_output_struct_to_map(cloned_weapon);
+
+            let mut is_valid_translate = true;
+
+            for cap in re.captures_iter(&template_content) {
+                for con in cap.iter() {
+                    if let Some(c) = con {
+                        let after_slice = &template_content[c.start()..c.end()];
+
+                        let after_replace = after_slice.replace("{", "").replace("}", "");
+
+                        if let Some(map_value) = field_map.get(&*after_replace) {
+                            if let Some(v) = map_value {
+                                res_str = res_str.replace("{", "").replace("}", "");
+                                res_str = res_str.replace(&after_replace, &v).to_owned();
+                            } else {
+                                is_valid_translate = false;
+                            }
+                        } else {
+                            is_valid_translate = false;
+                        }
+                    } else {
+                        is_valid_translate = false;
+                    }
+                }
+            }
+
+            if let Some(weapon_name) = weapon.name {
+                if is_valid_translate {
+                    template_output_vec.push(TemplateOutput {
+                        key: weapon_name,
+                        text: res_str,
+                    });
+                }
+            }
+        }
+
+        // 准备写入到文件
+        let translation_file_name = format!("translation-output-{}.xml", current_time);
+        let mut writer = quick_xml::Writer::new_with_indent(Cursor::new(Vec::new()), b' ', 4);
+
+        let translation_tag = BytesStart::owned(b"translation".to_owned(), "translation".len());
+        writer.write_event(Event::Start(translation_tag)).unwrap();
+
+        for output_item in template_output_vec {
+            let mut text_tag = BytesStart::owned(b"text".to_owned(), "text".len());
+
+            text_tag.push_attribute(("key", output_item.key.as_str()));
+            text_tag.push_attribute(("text", output_item.text.as_str()));
+
+            writer.write_event(Event::Empty(text_tag)).unwrap();
+        }
+
+        writer
+            .write_event(Event::End(BytesEnd::borrowed(b"translation")))
+            .unwrap();
+
+        let result = String::from_utf8(writer.into_inner().into_inner()).unwrap();
+        fs::write(translation_file_name.clone(), result).unwrap();
+
+        println!("===Translation task completed===");
+        println!("Output fileName: {}", translation_file_name);
+    }
 }

@@ -1,0 +1,1 @@
+{{cn_name}} 致死： {{result_hit_kill_probability}} 射击间隔： {{retrigger_time}} 后坐力： {{sustained_fire_grow_step}} &#10;速度加成： {{modifier_speed}} 全效射程： {{result_hit_kill_decay_start_time}}x{{projectile_speed}} 视距： {{sight_range_modifier}}

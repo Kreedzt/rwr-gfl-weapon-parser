@@ -1,7 +1,6 @@
+use encoding_rs::*;
 use std::fs::File;
 use std::io::Read;
-use encoding_rs::*;
-
 
 pub fn read_file_decode_to_utf8(path: &str) -> Result<String, String> {
     let file = File::open(path);
@@ -15,8 +14,6 @@ pub fn read_file_decode_to_utf8(path: &str) -> Result<String, String> {
 
             Ok(String::from(&cow[..]))
         }
-        Err(_) => {
-            Err("Can't open file".to_string())
-        }
+        Err(_) => Err("Can't open file".to_string()),
     }
 }

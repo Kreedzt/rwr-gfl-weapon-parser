@@ -22,3 +22,4 @@ encoding_rs = "0.8.30"
 structopt = { version = "0.3", default-features = false }
 quick-xml = { version = "0.22.0" }
 indicatif = "0.16.2"
+regex = "1.5.5"

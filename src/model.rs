@@ -10,7 +10,10 @@ pub struct Opt {
     pub input: PathBuf,
     /// cn translation file full path
     #[structopt(short, long, parse(from_os_str))]
-    pub translation: PathBuf
+    pub translation: PathBuf,
+    /// translation replace template file
+    #[structopt(long, parse(from_os_str))]
+    pub template: Option<PathBuf>,
 }
 
 // 适用于 CSV 输出的内容
@@ -28,7 +31,6 @@ pub struct Output {
     pub hud_icon: Option<String>,
 
     pub tag: Option<String>,
-
 
     pub drop_count_factor_on_death: Option<f32>,
     pub drop_count_factor_on_player_death: Option<f32>,
@@ -116,7 +118,13 @@ pub struct Output {
     // pub modifier_speed: Option<f32>,
 
     // 猜测: 中文名称
-    pub cn_name: Option<String>
+    pub cn_name: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct TemplateOutput {
+    pub key: String,
+    pub text: String,
 }
 
 impl Default for Output {
@@ -212,8 +220,16 @@ impl Default for Output {
             solt: None,
             barrel_offset_3d: None,
             // modifier_speed: None
+            cn_name: None,
+        }
+    }
+}
 
-            cn_name: None
+impl Default for TemplateOutput {
+    fn default() -> Self {
+        Self {
+            key: "".to_string(),
+            text: "".to_string(),
         }
     }
 }
