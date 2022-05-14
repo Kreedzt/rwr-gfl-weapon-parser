@@ -32,5 +32,5 @@ fn main() {
 
     let output = export_to_file(folder_path, translation_path);
 
-    println!("Task completed, fileName: {}", output.unwrap());
+    println!("Output fileName: {}", output.unwrap());
 }
