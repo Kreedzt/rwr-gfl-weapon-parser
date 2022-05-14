@@ -1,7 +1,5 @@
-cargo-features = ["strip"]
-
 [package]
-name = "weapon-parser"
+name = "rwr_gfl_weapon_parser"
 version = "0.9.0"
 edition = "2021"
 authors = ["Kreedzt"]
