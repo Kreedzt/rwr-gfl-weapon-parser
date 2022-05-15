@@ -53,7 +53,7 @@ pub struct Output {
     pub can_shoot_crouching: Option<u8>,
     pub can_shoot_prone: Option<u8>,
 
-    pub burst_shots: Option<i32>,
+    pub burst_shots: Option<f32>,
     pub sight_range_modifier: Option<f32>,
     pub ai_sight_range_modifier: Option<f32>,
 
