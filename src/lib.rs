@@ -4,17 +4,17 @@ mod parse;
 
 use crate::model::Output;
 use crate::parse::{parse_empty_event, parse_normal_event, parse_translation_empty};
-// use crate::decode::read_file_decode_to_utf8;
 use chrono::prelude::*;
 use csv::Writer;
 use quick_xml::{events::Event, Reader};
 use std::collections::HashMap;
 use std::{fs, io};
+use anyhow::{Result, anyhow};
 
 pub fn export_to_file(
     folder_path: &str,
     translation_path: &str
-) -> Result<String, ()> {
+) -> Result<String> {
     let local = Local::now();
 
     let current_time = local.format("%Y-%m-%d-%H-%M-%S").to_string();
@@ -36,11 +36,11 @@ pub fn export_to_file(
             // }
             // 闭合标签
             Ok(Event::Empty(ref e)) => {
-                parse_translation_empty(e, &mut reader, &mut translation_map, &mut extra_msg_list);
+                parse_translation_empty(e, &mut reader, &mut translation_map, &mut extra_msg_list)?;
             }
             Ok(Event::Text(e)) => {
                 // holder
-                println!("text: {}", e.unescape_and_decode(&reader).unwrap());
+                println!("text: {:?}", e.unescape_and_decode(&reader));
             }
             Ok(Event::Eof) => break,
             Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
@@ -89,14 +89,18 @@ pub fn export_to_file(
         loop {
             match reader.read_event(&mut buf) {
                 Ok(Event::Start(ref e)) => {
-                    parse_normal_event(e, &mut reader, &mut output_struct, &mut extra_msg_list);
+                    parse_normal_event(e, &mut reader, &mut output_struct, &mut extra_msg_list).map_err(|err| {
+                        anyhow!("Err in file: {}, parse_normal_event \n {:?}", last_path, err)
+                    })?;
                 }
                 // 闭合标签
                 Ok(Event::Empty(ref e)) => {
-                    parse_empty_event(e, &mut reader, &mut output_struct, &mut extra_msg_list);
+                    parse_empty_event(e, &mut reader, &mut output_struct, &mut extra_msg_list).map_err(|err| {
+                        anyhow!("Err in file: {}, parse_empty_event \n {:?}", last_path, err)
+                    })?
                 }
                 Ok(Event::Text(e)) => {
-                    println!("text: {}", e.unescape_and_decode(&reader).unwrap());
+                    println!("text: {:?}", e.unescape_and_decode(&reader));
                 }
                 Ok(Event::End(ref e)) => {
                     match e.name() {
@@ -117,12 +121,14 @@ pub fn export_to_file(
             }
         }
 
-        for mut output_item in output_weapons_vec  {
+        for mut output_item in output_weapons_vec {
             // 若包含 file， 表明存在模板
-            if let Some(ref file) = output_item.weapon_template_file {
+            if let Some(file) = output_item.weapon_template_file.clone() {
                 println!("===found template: {}, ready to parse===", file);
                 let template_file_name_path = format!("{}\\{}", folder_path, file);
-                let res_str = decode::read_file_decode_to_utf8(&template_file_name_path).unwrap_or("".to_string());
+                let res_str = decode::read_file_decode_to_utf8(&template_file_name_path).map_err(|err| {
+                    anyhow!("Err in path: {}, read_file_decode_to_utf8 \n {:?}", file, err)
+                })?;
 
                 let mut reader = Reader::from_str(&res_str);
                 reader.trim_text(true);
@@ -131,14 +137,18 @@ pub fn export_to_file(
                 loop {
                     match reader.read_event(&mut buf) {
                         Ok(Event::Start(ref e)) => {
-                            parse_normal_event(e, &mut reader, &mut output_item, &mut extra_msg_list);
+                            parse_normal_event(e, &mut reader, &mut output_item, &mut extra_msg_list).map_err(|err| {
+                                anyhow!("Err in file: {}, parse_normal_event \n {:?}", file, err)
+                            })?
                         }
                         // 闭合标签
                         Ok(Event::Empty(ref e)) => {
-                            parse_empty_event(e, &mut reader, &mut output_item, &mut extra_msg_list);
+                            parse_empty_event(e, &mut reader, &mut output_item, &mut extra_msg_list).map_err(|err| {
+                                anyhow!("Err in file: {}, parse_empty_event \n {:?}", file, err)
+                            })?
                         }
                         Ok(Event::Text(e)) => {
-                            println!("text: {}", e.unescape_and_decode(&reader).unwrap());
+                            println!("text: {:?}", e.unescape_and_decode(&reader));
                         }
                         Ok(Event::Eof) => break,
                         Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
@@ -153,13 +163,14 @@ pub fn export_to_file(
                 println!("===cn_name: {:?} ===", output_item.cn_name);
             }
 
-            writer.serialize(output_item.clone()).unwrap();
+
+            writer.serialize(output_item)?;
         }
 
         println!("===parse completed===");
     }
 
-    writer.flush().expect("flush error");
+    writer.flush()?;
 
     println!("===extra_msg_list===");
 
