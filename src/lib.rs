@@ -68,12 +68,10 @@ pub fn export_to_file(
 
     for (index, path) in entries.into_iter().enumerate() {
         println!("process: {} / {}", index + 1, total);
-        // let last_path = path.display().to_string().split("\\").last().unwrap();
-        let path_string = path.display().to_string();
-        let path_list = path_string.split("\\").collect::<Vec<_>>();
 
-        let last_path = path_list.last().unwrap();
-        println!("===Starting parsing file: {}===", last_path);
+        let file_name_option = path.file_name().unwrap();
+        let file_name = String::from(file_name_option.to_str().unwrap());
+        println!("===Starting parsing file: {}===", file_name);
 
         let res_str =
             decode::read_file_decode_to_utf8(&path.into_os_string().into_string().unwrap()).unwrap_or("".to_string());
@@ -84,19 +82,19 @@ pub fn export_to_file(
 
         let mut output_weapons_vec: Vec<Output> = vec![];
         let mut output_struct = Output::default();
-        output_struct.source_file_name = last_path.to_string();
+        output_struct.source_file_name = file_name.clone();
 
         loop {
             match reader.read_event(&mut buf) {
                 Ok(Event::Start(ref e)) => {
                     parse_normal_event(e, &mut reader, &mut output_struct, &mut extra_msg_list).map_err(|err| {
-                        anyhow!("Err in file: {}, parse_normal_event \n {:?}", last_path, err)
+                        anyhow!("Err in file: {}, parse_normal_event \n {:?}", file_name, err)
                     })?;
                 }
                 // 闭合标签
                 Ok(Event::Empty(ref e)) => {
                     parse_empty_event(e, &mut reader, &mut output_struct, &mut extra_msg_list).map_err(|err| {
-                        anyhow!("Err in file: {}, parse_empty_event \n {:?}", last_path, err)
+                        anyhow!("Err in file: {}, parse_empty_event \n {:?}", file_name, err)
                     })?
                 }
                 Ok(Event::Text(e)) => {
@@ -108,7 +106,7 @@ pub fn export_to_file(
                         b"weapon" => {
                             output_weapons_vec.push(output_struct);
                             output_struct = Output::default();
-                            output_struct.source_file_name = last_path.to_string();
+                            output_struct.source_file_name = file_name.clone();
                         }
                         _ => {
                             // holder
