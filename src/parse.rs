@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-only
 use crate::Output;
 use quick_xml::events::BytesStart;
 use quick_xml::Reader;
